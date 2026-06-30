@@ -38,12 +38,33 @@ class ParentChildIndexProcessor:
         text_nodes = splitter.split_text(text=input_text)
         for text_node in text_nodes:
             if text_node.strip():
+                ## 摘要
+                ts=text_node.split("<s>")
+                if len(ts)==2:
+                    summary=ts[0]
+                    text_node=ts[1]
+                else:
+                    summary=""
+                ti=text_node.split("<i>")
+                if len(ti)==2:
+                    ## 高语义关键词
+                    highlight=ti[0]
+                    text_node=ti[1]
+                else:
+                    highlight=""
+                te=text_node.split("<e>")
+                if len(te)==2:
+                    ## 低语义关键词
+                    lowlight=te[0]
+                    text_node=te[1]
+                else:
+                    lowlight=""
                 # Split text into child nodes
                 child_nodes = self._split_child_nodes(text_node, rules)
                 all_documents.parent_child_chunks.append(
                     ParentChildChunk(
-                        parent_content=text_node,
-                        child_contents=child_nodes,
+                        parent_content=text_node.replace(rules.subchunk_segmentation.separator, ""),
+                        child_contents=[summary]+[highlight]+[lowlight]+child_nodes,
                         parent_mode="paragraph",
                     )
                 )
